@@ -1,0 +1,1 @@
+from plover_per_application_state.state.manager import StateManager
