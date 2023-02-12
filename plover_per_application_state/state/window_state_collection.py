@@ -27,6 +27,7 @@ class WindowStateCollection:
             self._states[title] = (state, timestamp)
             global_key = (self._handle_hash, title)
             WindowStateCollection._all_states[global_key] = (self, timestamp)
+            return state
         except KeyError:
             return _State()
 
