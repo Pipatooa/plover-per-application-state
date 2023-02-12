@@ -1,7 +1,6 @@
 from __future__ import annotations
 
 from plover.engine import StenoEngine
-from plover.log import info
 
 from plover_per_application_state.state.window_state_collection import WindowStateCollection
 

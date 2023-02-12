@@ -1,1 +1,2 @@
 from plover_per_application_state.state.manager import StateManager
+from plover_per_application_state.state.window_state_collection import WindowStateCollection
