@@ -25,11 +25,9 @@ class PerApplicationStateExtension:
 
     def start(self) -> None:
         self._on = True
-        self._engine.hook_connect("translated", self.on_translated)
 
     def stop(self) -> None:
         self._on = False
-        self._engine.hook_disconnect("translated", self.on_translated)
 
     def on_window_callback(self, _, details: WindowDetails) -> None:
         if not self._on:
