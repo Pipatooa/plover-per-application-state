@@ -1,66 +1,77 @@
 from __future__ import annotations
 
+from typing import Tuple
+
 from plover.engine import StenoEngine
+from plover.translation import _State
 
 from plover_per_application_state.state.window_state_collection import WindowStateCollection
+import plover_per_application_state.transition_handler.handler as transition_handler
 
 
 class StateManager:
     WINDOW_LIMIT = (50, 10)
 
-    _current_handle_hash = hash(None)
-    _current_title = ""
-    _window_state_collections = {}
-    _window_state_collection_count = 0
+    def __init__(self, handlers: [transition_handler.WindowTransitionHandler]):
+        self._window_state_collections = {}
+        self._window_state_collection_count = 0
+        self._next_timestamp = -1
 
-    _next_timestamp = -1
+        self._transition_handlers = handlers
 
-    @staticmethod
-    def _timestamp() -> int:
-        StateManager._next_timestamp += 1
-        return StateManager._next_timestamp
+    def add_transition_handlers(self, handlers: [transition_handler.WindowTransitionHandler]) -> None:
+        self._transition_handlers.extend(handlers)
+        self._transition_handlers.sort(reverse=True)
 
-    @staticmethod
-    def switch_states(engine: StenoEngine, handle_hash: int, title: str) -> None:
-        retrieved_state = StateManager._get_window_state_collection(handle_hash)[title]
-        current_state_collection = StateManager._get_window_state_collection(StateManager._current_handle_hash)
-        current_state_collection[StateManager._current_title] = engine.translator_state
-        StateManager._current_handle_hash = handle_hash
-        StateManager._current_title = title
-        engine.translator_state = retrieved_state
-        StateManager._check_eviction()
+    def remove_transition_handlers(self, handlers: [transition_handler.WindowTransitionHandler]) -> None:
+        for handler in handlers:
+            self._transition_handlers.remove(handler)
 
-    @staticmethod
-    def _get_window_state_collection(handle_hash: int) -> WindowStateCollection:
-        timestamp = StateManager._timestamp()
+    def on_transition(self, engine: StenoEngine,
+                      old_details: Tuple[int, Tuple[str, str, str]],
+                      new_details: Tuple[int, Tuple[str, str, str]]) -> None:
+
+        for handler in self._transition_handlers:
+            if handler.handle_transition(self, engine, old_details, new_details):
+                break
+
+    def store_state(self, handle_hash: int, title: str, state: _State) -> None:
+        self._get_window_state_collection(handle_hash)[title] = state
+        self._check_eviction()
+
+    def get_state(self, handle_hash: int, title: str) -> _State:
+        return self._get_window_state_collection(handle_hash)[title]
+
+    def _timestamp(self) -> int:
+        self._next_timestamp += 1
+        return self._next_timestamp
+
+    def _get_window_state_collection(self, handle_hash: int) -> WindowStateCollection:
+        timestamp = self._timestamp()
         try:
-            state_collection = StateManager._window_state_collections[handle_hash][0]
+            state_collection = self._window_state_collections[handle_hash][0]
         except KeyError:
             state_collection = WindowStateCollection(handle_hash)
-            StateManager._window_state_collection_count += 1
-        StateManager._window_state_collections[handle_hash] = (state_collection, timestamp)
+            self._window_state_collection_count += 1
+        self._window_state_collections[handle_hash] = (state_collection, timestamp)
         return state_collection
 
-    @staticmethod
-    def _check_eviction() -> None:
-        if StateManager._window_state_collection_count > sum(StateManager.WINDOW_LIMIT):
-            StateManager._evict(StateManager.WINDOW_LIMIT[1])
+    def _check_eviction(self) -> None:
+        if self._window_state_collection_count > sum(StateManager.WINDOW_LIMIT):
+            self._evict(StateManager.WINDOW_LIMIT[1])
 
-    @staticmethod
-    def _evict(n: int) -> None:
-        candidates = sorted(StateManager._window_state_collections.items(), key=lambda x: x[1][1])
+    def _evict(self, n: int) -> None:
+        candidates = sorted(self._window_state_collections.items(), key=lambda x: x[1][1])
         for (handle_hash, (window_state_collection, _)), _ in zip(candidates, range(n)):
             window_state_collection.clear()
-            del StateManager._window_state_collections[handle_hash]
-        StateManager._window_state_collection_count -= n
+            del self._window_state_collections[handle_hash]
+        self._window_state_collection_count -= n
 
-    @staticmethod
-    def clear() -> None:
-        for window_state_collection, _ in StateManager._window_state_collections.values():
+    def clear(self) -> None:
+        for window_state_collection, _ in self._window_state_collections.values():
             window_state_collection.clear()
-        StateManager._window_state_collections.clear()
-        StateManager._window_state_collection_count = 0
+        self._window_state_collections.clear()
+        self._window_state_collection_count = 0
 
-    @staticmethod
-    def clear_window_state() -> None:
-        StateManager._get_window_state_collection(StateManager._current_handle_hash).clear()
+    def clear_window(self, handle_hash: int) -> None:
+        self._get_window_state_collection(handle_hash).clear()

@@ -1,6 +1,7 @@
 from plover.engine import StenoEngine
+from plover_application_controls import WindowTracker
 
-from plover_per_application_state.state import StateManager
+from plover_per_application_state import PerApplicationStateExtension
 
 
 def command(engine: StenoEngine, arg: str) -> None:
@@ -15,12 +16,13 @@ def clear(engine: StenoEngine) -> None:
 
 
 def clear_all(engine: StenoEngine) -> None:
-    StateManager.clear()
+    PerApplicationStateExtension.get_state_manager().clear()
     engine.clear_translator_state()
 
 
 def clear_window(engine: StenoEngine) -> None:
-    StateManager.clear_window_state()
+    handle_hash = WindowTracker.current_handle_hash
+    PerApplicationStateExtension.get_state_manager().clear_window(handle_hash)
     engine.clear_translator_state()
 
 
