@@ -49,7 +49,18 @@ class StateManager:
     @staticmethod
     def _evict(n: int) -> None:
         candidates = sorted(StateManager._window_state_collections.items(), key=lambda x: x[1][1])
-        for (handle_hash, _), _ in zip(candidates, range(n)):
-            StateManager._window_state_collections[handle_hash][0].clear()
+        for (handle_hash, (window_state_collection, _)), _ in zip(candidates, range(n)):
+            window_state_collection.clear()
             del StateManager._window_state_collections[handle_hash]
         StateManager._window_state_collection_count -= n
+
+    @staticmethod
+    def clear() -> None:
+        for window_state_collection, _ in StateManager._window_state_collections.values():
+            window_state_collection.clear()
+        StateManager._window_state_collections.clear()
+        StateManager._window_state_collection_count = 0
+
+    @staticmethod
+    def clear_window_state() -> None:
+        StateManager._get_window_state_collection(StateManager._current_handle_hash).clear()

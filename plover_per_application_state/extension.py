@@ -7,7 +7,10 @@ from plover_per_application_state.state.manager import StateManager
 
 
 class PerApplicationStateExtension:
+    _instance = None
+
     def __init__(self, engine: StenoEngine) -> None:
+        PerApplicationStateExtension._instance = self
         self._on = False
         self._engine = engine
         WindowTracker.add_callback(True, self.on_window_callback)
