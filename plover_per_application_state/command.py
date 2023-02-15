@@ -21,7 +21,7 @@ def clear_all(engine: StenoEngine) -> None:
 
 
 def clear_window(engine: StenoEngine) -> None:
-    handle_hash = WindowTracker.current_handle_hash
+    handle_hash = WindowTracker.current_window_details.handle_hash
     PerApplicationStateExtension.get_state_manager().clear_window(handle_hash)
     engine.clear_translator_state()
 

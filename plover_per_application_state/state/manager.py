@@ -1,38 +1,35 @@
 from __future__ import annotations
 
-from typing import Tuple
-
 from plover.engine import StenoEngine
 from plover.translation import _State
 
 from plover_per_application_state.state.window_state_collection import WindowStateCollection
-import plover_per_application_state.transition_handler.handler as transition_handler
+import plover_per_application_state.transition.handler.handler as transition_handler
+from plover_per_application_state.transition import TransitionDetails
 
 
 class StateManager:
     WINDOW_LIMIT = (50, 10)
 
-    def __init__(self, handlers: [transition_handler.WindowTransitionHandler]):
+    def __init__(self, handlers: [transition_handler.TransitionHandler]):
         self._window_state_collections = {}
         self._window_state_collection_count = 0
         self._next_timestamp = -1
 
         self._transition_handlers = handlers
+        self._transition_handlers.sort(reverse=True)
 
-    def add_transition_handlers(self, handlers: [transition_handler.WindowTransitionHandler]) -> None:
+    def add_transition_handlers(self, handlers: [transition_handler.TransitionHandler]) -> None:
         self._transition_handlers.extend(handlers)
         self._transition_handlers.sort(reverse=True)
 
-    def remove_transition_handlers(self, handlers: [transition_handler.WindowTransitionHandler]) -> None:
+    def remove_transition_handlers(self, handlers: [transition_handler.TransitionHandler]) -> None:
         for handler in handlers:
             self._transition_handlers.remove(handler)
 
-    def on_transition(self, engine: StenoEngine,
-                      old_details: Tuple[int, Tuple[str, str, str]],
-                      new_details: Tuple[int, Tuple[str, str, str]]) -> None:
-
+    def on_transition(self, engine: StenoEngine, details: TransitionDetails) -> None:
         for handler in self._transition_handlers:
-            if handler.handle_transition(self, engine, old_details, new_details):
+            if handler.handle_transition(self, engine, details):
                 break
 
     def store_state(self, handle_hash: int, title: str, state: _State) -> None:
