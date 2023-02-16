@@ -33,8 +33,8 @@ class DynamicTitleTransitionHandler(TransitionHandler):
         if time.time() - self._change_timestamp > DynamicTitleTransitionHandler.TITLE_CHANGE_TIMEOUT:
             return False
 
-        stored_state = state_manager.get_state(details.new_details.handle_hash, details.new_details.title)
-        return not stored_state or stored_state != engine.translator_state
+        stored_state = state_manager.get_state(details.new_details.handle_hash, details.new_details.title, False)
+        return not stored_state or stored_state == engine.translator_state
 
     def on_translated(self, old: [_Action], new: [_Action]) -> None:
         self._changes = True
