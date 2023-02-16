@@ -14,6 +14,9 @@ from plover_per_application_state.transition.handler.handler import TransitionHa
 class DynamicTitleTransitionHandler(TransitionHandler):
 
     TITLE_CHANGE_TIMEOUT = WindowTracker.CHECK_INTERVAL * 2
+    MERGE_PREVENTION_TIMEOUT = TITLE_CHANGE_TIMEOUT
+
+    _last_merge_prevention = 0
 
     def __init__(self, engine: StenoEngine, priority=100):
         super().__init__(engine, priority)
@@ -30,12 +33,27 @@ class DynamicTitleTransitionHandler(TransitionHandler):
         if not changes or details.window_changed:
             return False
 
-        if time.time() - self._change_timestamp > DynamicTitleTransitionHandler.TITLE_CHANGE_TIMEOUT:
+        current_time = time.time()
+
+        if current_time - DynamicTitleTransitionHandler._last_merge_prevention \
+                < DynamicTitleTransitionHandler.MERGE_PREVENTION_TIMEOUT:
+            return False
+
+        if current_time - self._change_timestamp \
+                > DynamicTitleTransitionHandler.TITLE_CHANGE_TIMEOUT:
             return False
 
         stored_state = state_manager.get_state(details.new_details.handle_hash, details.new_details.title, False)
         return not stored_state or stored_state == engine.translator_state
 
     def on_translated(self, old: [_Action], new: [_Action]) -> None:
+        for action in new:
+            if action.command and action.command.startswith("application:"):
+                return
+
         self._changes = True
         self._change_timestamp = time.time()
+
+    @staticmethod
+    def prevent_merge():
+        DynamicTitleTransitionHandler._last_merge_prevention = time.time()
