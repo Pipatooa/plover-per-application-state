@@ -1,2 +1,3 @@
 from plover_per_application_state.transition.handler.handler import TransitionHandler
 from plover_per_application_state.transition.handler.default import DefaultTransitionHandler
+from plover_per_application_state.transition.handler.dynamic_title import DynamicTitleTransitionHandler

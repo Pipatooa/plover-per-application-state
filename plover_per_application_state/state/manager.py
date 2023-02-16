@@ -36,8 +36,11 @@ class StateManager:
         self._get_window_state_collection(handle_hash)[title] = state
         self._check_eviction()
 
-    def get_state(self, handle_hash: int, title: str) -> _State:
-        return self._get_window_state_collection(handle_hash)[title]
+    def get_state(self, handle_hash: int, title: str, default=True) -> _State | None:
+        state_collection = self._get_window_state_collection(handle_hash)
+        if not default and title not in state_collection:
+            return None
+        return state_collection[title]
 
     def _timestamp(self) -> int:
         self._next_timestamp += 1

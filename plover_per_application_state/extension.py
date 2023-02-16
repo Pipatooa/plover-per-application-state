@@ -17,6 +17,7 @@ class PerApplicationStateExtension:
         self._engine = engine
 
         self._state_manager = StateManager([
+            handlers.DynamicTitleTransitionHandler(engine),
             handlers.DefaultTransitionHandler(engine)
         ])
         self._last_details = WindowTracker.BLANK_DETAILS

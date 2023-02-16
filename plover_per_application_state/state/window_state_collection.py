@@ -20,6 +20,9 @@ class WindowStateCollection:
         WindowStateCollection._next_timestamp += 1
         return WindowStateCollection._next_timestamp
 
+    def __contains__(self, title: str) -> bool:
+        return title in self._states
+
     def __getitem__(self, title: str) -> _State:
         try:
             state = self._states[title][0]
