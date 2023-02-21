@@ -4,7 +4,7 @@ import time
 
 from plover.engine import StenoEngine
 from plover.formatting import _Action
-from plover_application_controls import WindowTracker
+from plover_application_controls.window import WindowTracker
 
 import plover_per_application_state.state.manager as _state_manager
 from plover_per_application_state.transition.details import TransitionDetails

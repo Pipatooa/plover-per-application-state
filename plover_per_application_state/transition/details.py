@@ -1,6 +1,6 @@
 from dataclasses import dataclass
 
-from plover_application_controls import WindowDetails
+from plover_application_controls.window import WindowDetails
 
 
 @dataclass

@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 from plover.engine import StenoEngine
-from plover_application_controls import WindowTracker, WindowDetails
+from plover_application_controls.window import WindowTracker, WindowDetails
 
 from plover_per_application_state.state.manager import StateManager
 import plover_per_application_state.transition.handler as handlers

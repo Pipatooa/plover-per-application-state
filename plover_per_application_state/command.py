@@ -1,5 +1,5 @@
 from plover.engine import StenoEngine
-from plover_application_controls import WindowTracker
+from plover_application_controls.window import WindowTracker
 
 from plover_per_application_state import PerApplicationStateExtension
 from plover_per_application_state.transition.handler import DynamicTitleTransitionHandler
